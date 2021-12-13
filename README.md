@@ -1,6 +1,7 @@
 ---
 title: "Cyclistic Bikeshare"
-output: html_document
+output: html_document:
+          keep_md: true
 ---
 
 ```{r setup, include=FALSE}
