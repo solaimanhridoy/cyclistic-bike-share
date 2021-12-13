@@ -31,8 +31,8 @@ setwd("/media/solaiman/D/home/lib10/Insync/hridoy341@gmail.com/Google Drive/Cour
 
 Loading Data-sets
 ```{r Load datasets}
-tripdata_202011 <- read_csv("2020_11-divvy-tripdata_2.csv")
-# tripdata_202012 <- read_csv("202012-divvy-tripdata.csv")
+tripdata_202011 <- read_csv("202011-divvy-tripdata.csv")
+tripdata_202012 <- read_csv("202012-divvy-tripdata.csv")
 #tripdata_202101 <- read_csv("202101-divvy-tripdata.csv")
 #tripdata_202102 <- read_csv("202102-divvy-tripdata.csv")
 #tripdata_202103 <- read_csv("202103-divvy-tripdata.csv")
@@ -51,7 +51,7 @@ class(tripdata_202011)
 
 ```{r Check Column Names}
 colnames(tripdata_202011)
-# colnames(tripdata_202012)
+colnames(tripdata_202012)
 #colnames(tripdata_202101)
 #colnames(tripdata_202102)
 #colnames(tripdata_202103)
@@ -73,8 +73,8 @@ str(tripdata_202011)
 
 Combining all data frames into one data frame
 ```{r concat datasets}
-all_tripdata <- rbind(tripdata_202011)
-                  # tripdata_202012)
+all_tripdata <- rbind(tripdata_202011,
+                  tripdata_202012)
                   #tripdata_202101,
                   #tripdata_202102,
                   #tripdata_202103,
@@ -105,15 +105,6 @@ nrow(all_tripdata)
 ```{r dimensions of the data frame}
 dim(all_tripdata)
 ```
-```{r}
-drop <- c("distance in nautical_miles", "distance in km", "mean_distance", "max_distance", "min_distance", "ride_length", "day_of_week")
-all_tripdata = all_tripdata[,!(names(all_tripdata) %in% drop)]
-```
-
-```{r dimensions of the data frame}
-dim(all_tripdata)
-```
-
 ```{r first 6 rows of the dataframe}
 head(all_tripdata)
 ```
@@ -152,6 +143,7 @@ all_trips_cleaned <- all_trips_cleaned %>%
   filter(all_trips_cleaned$started_at < all_trips_cleaned$ended_at)
 ```
 
+
 ```{r head of all_trips_cleaned}
 head(all_trips_cleaned)
 ```
@@ -163,17 +155,6 @@ all_trips_cleaned$ride_length <- all_trips_cleaned$ended_at - all_trips_cleaned$
 
 ```{r}
 head(all_trips_cleaned$ride_length)
-```
-``` {r remove 01 second durations}
-all_trips_cleaned <- subset(all_trips_cleaned, ride_length!= 1)
-all_trips_cleaned <- subset(all_trips_cleaned, ride_length!= 2)
-all_trips_cleaned <- subset(all_trips_cleaned, ride_length!= 3)
-all_trips_cleaned <- subset(all_trips_cleaned, ride_length!= 4)
-all_trips_cleaned <- subset(all_trips_cleaned, ride_length!= 5)
-```
-
-```{r}
-nrow(all_trips_cleaned)
 ```
 
 ```{r ride length sec to period}
@@ -205,10 +186,6 @@ all_trips_cleaned %>%
   rename_at("a", ~ "Max of  ride_length") 
 ```
 
-```{r dimensions of the data frame}
-dim(all_trips_cleaned)
-```
-
 ```{r min of ride_length}
 all_trips_cleaned %>% 
   summarise(a = hms::hms(seconds_to_period(min(ride_length)))) %>% 
@@ -229,21 +206,6 @@ all_trips_cleaned %>%
   group_by(member_casual) %>% 
   summarise(a = hms::hms(seconds_to_period(mean(ride_length)))) %>% 
   rename_at("a", ~ "Average ride_length")
-```
-```{r}
-# Max ride_length for members and casual riders
-all_trips_cleaned %>% 
-  group_by(member_casual) %>% 
-  summarise(a = hms::hms(seconds_to_period(max(ride_length)))) %>% 
-  rename_at("a", ~ "Max ride_length")
-```
-
-```{r}
-# Min ride_length for members and casual riders
-all_trips_cleaned %>% 
-  group_by(member_casual) %>% 
-  summarise(a = hms::hms(seconds_to_period(min(ride_length)))) %>% 
-  rename_at("a", ~ "Min ride_length")
 ```
 
 ```{r}
@@ -276,7 +238,7 @@ all_trips_cleaned %>%
   arrange(member_casual, weekday)
 ```
 
-```{r}
+```{r visualize 1}
 # visualize number of rides by rider type
 all_trips_cleaned %>% 
   mutate(weekday = wday(started_at, label = TRUE)) %>% 
@@ -292,32 +254,38 @@ all_trips_cleaned %>%
   ylab("Number of Rides") +
   xlab("Day of Week")
 ```
+```{r visualize 02}
+all_trips_cleaned %>% 
+mutate(weekday = wday(started_at, label = TRUE)) %>% 
+  group_by(member_casual, weekday) %>% 
+  summarize(average_duration = mean(ride_length)) %>% 
+  arrange(member_casual, weekday) %>% 
+  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
+  geom_col(position = "dodge") +
+  scale_fill_manual(values = c("#CC6633","#6699CC")) +
+  labs(title = "Average Duration of Rides by Days and Rider Type",
+       subtitle = "Members versus Casual Users") +
+  ylab("Average Duration of Rides") +
+  xlab("Day of Week")
+```
+
+```{r }
+# average ride_length by type and of week
+counts <- aggregate(all_trips_cleaned$ride_length ~ all_trips_cleaned$member_casual + all_trips_cleaned$day_of_week, FUN=mean)
+```
 
 ```{r}
-# average ride_length by type and day of week
-counts <- aggregate(all_trips_cleaned$ride_length ~ all_trips_cleaned$member_casual +
-                      all_trips_cleaned$day_of_week, FUN = mean)
-
 write.csv(counts, file = 'avg_ride-length.csv')
 ```
-
-```{r}
-# average ride_length and type and month
-all_trips_cleaned$month <- month(all_trips_cleaned$started_at, label = TRUE)
-
-rides <- aggregate(all_trips_cleaned$ride_length ~ all_trips_cleaned$member_casual +
-                     all_trips_cleaned$month,FUN = mean)
-
-write.csv(rides, file = 'avg_ride_length_by_month.csv')
-```
-
 ```{r}
 # dataset for visualization on Tableau
-alltrips <- all_trips_cleaned %>% 
+divvy_trips <- all_trips_cleaned %>% 
   select(-day_of_week)
 
-alltrips$day_of_week <- wday(alltrips$started_at, label = TRUE)
+divvy_trips$day_of_week <- wday(divvy_trips$started_at, label = TRUE)
 
 write.csv(alltrips, file = "all_trips.csv", row.names = FALSE)
 ```
+
+
 
