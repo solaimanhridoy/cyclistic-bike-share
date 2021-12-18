@@ -1,292 +1,32 @@
----
-title: "Cyclistic Bikeshare"
-output: html_document:
-          keep_md: true
----
+# Case Study 1
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-## Install Required Packages
-```{r}
-install.packages("tidyverse")
-```
-```{r}
-install.packages("DescTools")
-```
+## Case Study: How Does a Bike-Share Navigate Speedy Success?
 
-## Prepare and Process Data
-
-Importing library tidyverse 
-```{r import library}
-library(tidyverse)
-library(lubridate)
-library(ggplot2)
-library(lubridate)
-```
-```{r}
-getwd()
-setwd("/media/solaiman/D/home/lib10/Insync/hridoy341@gmail.com/Google Drive/Courses and Projects/Data Analysis/Course 08: Capstone Projects/Case Study 01")
-```
-
-
-Loading Data-sets
-```{r Load datasets}
-tripdata_202011 <- read_csv("202011-divvy-tripdata.csv")
-tripdata_202012 <- read_csv("202012-divvy-tripdata.csv")
-#tripdata_202101 <- read_csv("202101-divvy-tripdata.csv")
-#tripdata_202102 <- read_csv("202102-divvy-tripdata.csv")
-#tripdata_202103 <- read_csv("202103-divvy-tripdata.csv")
-#tripdata_202104 <- read_csv("202104-divvy-tripdata.csv")
-#tripdata_202105 <- read_csv("202105-divvy-tripdata.csv")
-#tripdata_202106 <- read_csv("202106-divvy-tripdata.csv")
-#tripdata_202107 <- read_csv("202107-divvy-tripdata.csv")
-#tripdata_202108 <- read_csv("202108-divvy-tripdata.csv")
-#tripdata_202109 <- read_csv("202109-divvy-tripdata.csv")
-#tripdata_202110 <- read_csv("202110-divvy-tripdata.csv")
-```
-
-```{r what type of data they are now?}
-class(tripdata_202011)
-```
-
-```{r Check Column Names}
-colnames(tripdata_202011)
-colnames(tripdata_202012)
-#colnames(tripdata_202101)
-#colnames(tripdata_202102)
-#colnames(tripdata_202103)
-#colnames(tripdata_202104)
-#colnames(tripdata_202105)
-#colnames(tripdata_202106)
-#colnames(tripdata_202107)
-#colnames(tripdata_202108)
-#colnames(tripdata_202109)
-#colnames(tripdata_202110)
-```
-
-
-```{r data type}
-str(tripdata_202011)
-```
+------
 
 
 
-Combining all data frames into one data frame
-```{r concat datasets}
-all_tripdata <- rbind(tripdata_202011,
-                  tripdata_202012)
-                  #tripdata_202101,
-                  #tripdata_202102,
-                  #tripdata_202103,
-                  #tripdata_202104,
-                  #tripdata_202105,
-                  #tripdata_202106,
-                  #tripdata_202107,
-                  #tripdata_202108,
-                  #tripdata_202109,
-                  #tripdata_202110)
-```
+### Introduction
 
-```{r}
-class(all_tripdata)
-```
+Welcome to the Cyclistic bike-share analysis case study! In this case study, you will perform many real world tasks of a junior data analyst. You will work for a ﬁctional company, Cyclistic, and meet diﬀerent characters and team members. In order to answer the key business questions, you will follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act. Along the way, the Case Study Roadmap tables — including guiding questions and key tasks — will help you stay on the right path. By the end of this lesson, you will have a portfolio-ready case study. Download the packet and reference the details of this
+case study anytime. Then, when you begin your job hunt, your case study will be a tangible way to demonstrate your knowledge and skills to potential employers. 
 
+### Scenario
 
-```{r summary data}
-glimpse(all_tripdata)
-```
+You are a junior data analyst working in the marketing analyst team at Cyclistic, a bike-share company in Chicago. The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. Therefore, your team wants to understand how casual riders and annual members use Cyclistic bikes diﬀerently. From these insights, your team will design a new marketing strategy to convert casual riders into annual members. But ﬁrst, Cyclistic executives must approve your recommendations, so they must be backed up with compelling data insights and professional data visualizations. 
 
-```{r list of column names}
-colnames(all_tripdata)
-```
-```{r number of rows}
-nrow(all_tripdata)
-```
-```{r dimensions of the data frame}
-dim(all_tripdata)
-```
-```{r first 6 rows of the dataframe}
-head(all_tripdata)
-```
-```{r view data in a new tab}
-View(all_tripdata)
-```
+### Characters and teams
 
+● *Cyclistic*: A bike-share program that features more than 5,800 bicycles and 600 docking stations. Cyclistic sets itself apart by also oﬀering reclining bikes, hand tricycles, and cargo bikes, making bike-share more inclusive to people with disabilities and riders who can’t use a standard two-wheeled bike. The majority of riders opt for traditional bikes; about 8% of riders use the assistive options. Cyclistic users are more likely to ride for leisure, but about 30% use them to commute to work each day.
 
-```{r the list of the columns and data types of the all_tripdata}
-str(all_tripdata)
-```
-```{r statistical summary of data}
-summary(all_tripdata)
-```
+● *Lily Moreno*: The director of marketing and your manager. Moreno is responsible for the development of campaigns
+and initiatives to promote the bike-share program. These may include email, social media, and other channels.
 
-```{r check the member_casual columns}
-table(all_tripdata$member_casual)
-```
+● *Cyclistic* marketing analytics team: A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Cyclistic marketing strategy. You joined this team six months ago and have been busy learning about Cyclistic’s mission and business goals — as well as how you, as a junior data analyst, can help Cyclistic achieve them.
 
-Remove rows with missing values
-```{r remove missing values}
-colSums(is.na(all_tripdata))
-```
+● Cyclistic executive team: The notoriously detail-oriented executive team will decide whether to approve the recommended marketing program.
 
-```{r cleaned tripdata}
-all_trips_cleaned <- all_tripdata[complete.cases(all_tripdata), ]
-```
+### About the company 
 
-```{r cleaned tripdata}
-nrow(all_trips_cleaned)
-```
-
-``` {r remove started_at geater than end_at}
-# data with started_at greater than ended_at will be removed
-all_trips_cleaned <- all_trips_cleaned %>%
-  filter(all_trips_cleaned$started_at < all_trips_cleaned$ended_at)
-```
-
-
-```{r head of all_trips_cleaned}
-head(all_trips_cleaned)
-```
-
-```{r create new column ride_length}
-all_trips_cleaned$ride_length <- all_trips_cleaned$ended_at - all_trips_cleaned$started_at
-
-```
-
-```{r}
-head(all_trips_cleaned$ride_length)
-```
-
-```{r ride length sec to period}
-all_trips_cleaned$ride_length <- hms::hms(seconds_to_period(all_trips_cleaned$ride_length))
-```
-
-```{r}
-head(all_trips_cleaned$ride_length)
-```
-
-```{r create a new clomun day_of_week}
-all_trips_cleaned$day_of_week <- wday(all_trips_cleaned$started_at, label = FALSE)
-```
-
-
-```{r ride_length seconds to period}
-all_trips_cleaned$ride_length <- hms::hms(seconds_to_period((all_trips_cleaned$ride_length)))
-```
-
-```{r mean of ride_length}
-all_trips_cleaned %>% 
-  summarise(a = hms::hms(seconds_to_period(mean(ride_length)))) %>% 
-  rename_at("a", ~ "Mean of  ride_length") 
-```
-
-```{r max of ride_length}
-all_trips_cleaned %>% 
-  summarise(a = hms::hms(seconds_to_period(max(ride_length)))) %>% 
-  rename_at("a", ~ "Max of  ride_length") 
-```
-
-```{r min of ride_length}
-all_trips_cleaned %>% 
-  summarise(a = hms::hms(seconds_to_period(min(ride_length)))) %>% 
-  rename_at("a", ~ "Min of  ride_length") 
-```
-
-```{r mode of day_of_week}
-library(DescTools)
-Mode(all_trips_cleaned$day_of_week)
-```
-```{r}
-library(janitor)
-clean_names(all_trips_cleaned)
-```
-```{r}
-# average ride_length for members and casual riders
-all_trips_cleaned %>% 
-  group_by(member_casual) %>% 
-  summarise(a = hms::hms(seconds_to_period(mean(ride_length)))) %>% 
-  rename_at("a", ~ "Average ride_length")
-```
-
-```{r}
-# average ride_length for users by day_of_week
-all_trips_cleaned %>% 
-  group_by(day_of_week) %>% 
-  summarise(a = hms::hms(seconds_to_period(mean(ride_length)))) %>% 
-  rename_at("a", ~ "Average ride_length")
-```
-
-```{r}
-# number of rides for users by day_of_week
-all_trips_cleaned %>% 
-  group_by(ride_id, day_of_week) %>% 
-  summarise(number_of_rides=n())
-```
-
-```{r}
-#  average ride time by each day for members vs casual users
-aggregate(all_trips_cleaned$ride_length ~ all_trips_cleaned$member_casual + all_trips_cleaned$day_of_week, FUN = mean)
-```
-
-```{r}
-# analyze ridership data by type and weekday
-all_trips_cleaned %>% 
-  mutate(weekday = wday(started_at, label = TRUE)) %>% 
-  group_by(member_casual, weekday) %>% 
-  summarize(number_of_rides = n(),
-            average_duration = mean(ride_length)) %>% 
-  arrange(member_casual, weekday)
-```
-
-```{r visualize 1}
-# visualize number of rides by rider type
-all_trips_cleaned %>% 
-  mutate(weekday = wday(started_at, label = TRUE)) %>% 
-  group_by(member_casual, weekday) %>% 
-  summarize(number_of_rides = n(),
-            average_duration = mean(ride_length)) %>% 
-  arrange(member_casual, weekday) %>% 
-  ggplot(aes(x = weekday, y = number_of_rides, fill = member_casual)) +
-  geom_col(position = "dodge") +
-  scale_fill_manual(values = c("#CC6633","#6699CC")) +
-  labs(title = "Number of Rides by Days and Rider Type",
-       subtitle = "Members versus Casual Users") +
-  ylab("Number of Rides") +
-  xlab("Day of Week")
-```
-```{r visualize 02}
-all_trips_cleaned %>% 
-mutate(weekday = wday(started_at, label = TRUE)) %>% 
-  group_by(member_casual, weekday) %>% 
-  summarize(average_duration = mean(ride_length)) %>% 
-  arrange(member_casual, weekday) %>% 
-  ggplot(aes(x = weekday, y = average_duration, fill = member_casual)) +
-  geom_col(position = "dodge") +
-  scale_fill_manual(values = c("#CC6633","#6699CC")) +
-  labs(title = "Average Duration of Rides by Days and Rider Type",
-       subtitle = "Members versus Casual Users") +
-  ylab("Average Duration of Rides") +
-  xlab("Day of Week")
-```
-
-```{r }
-# average ride_length by type and of week
-counts <- aggregate(all_trips_cleaned$ride_length ~ all_trips_cleaned$member_casual + all_trips_cleaned$day_of_week, FUN=mean)
-```
-
-```{r}
-write.csv(counts, file = 'avg_ride-length.csv')
-```
-```{r}
-# dataset for visualization on Tableau
-divvy_trips <- all_trips_cleaned %>% 
-  select(-day_of_week)
-
-divvy_trips$day_of_week <- wday(divvy_trips$started_at, label = TRUE)
-
-write.csv(alltrips, file = "all_trips.csv", row.names = FALSE)
-```
-
-
-
+In 2016, Cyclistic launched a successful bike-share oﬀering. Since then, the program has grown to a ﬂeet of 5,824 bicycles that are geotracked and locked into a network of 692 stations across Chicago. The bikes can be unlocked from one station and returned to any other station in the system anytime. Until now, Cyclistic’s marketing strategy relied on building general awareness and appealing to broad consumer segments. One approach that helped make these things possible was the ﬂexibility of its pricing plans: single-ride passes, full-day passes, and annual memberships. Customers who purchase single-ride or full-day passes are referred to as casual riders. Customers who purchase annual memberships are Cyclistic members.
+Cyclistic’s ﬁnance analysts have concluded that annual members are much more proﬁtable than casual riders. Although the pricing ﬂexibility helps Cyclistic attract more customers, Moreno believes that maximizing the number of annual members will be key to future growth. Rather than creating a marketing campaign that targets all-new customers, Moreno believes there is a very good chance to convert casual riders into members. She notes that casual riders are already aware of the Cyclistic program and have chosen Cyclistic for their mobility needs. Moreno has set a clear goal: Design marketing strategies aimed at converting casual riders into annual members. In order to do that, however, the marketing analyst team  needs to better understand how annual members and casual riders diﬀer, why casual riders would buy a membership, and how digital media could aﬀect their marketing tactics. Moreno and her team are interested in analyzing the Cyclistic historical bike trip data to identify trends.
